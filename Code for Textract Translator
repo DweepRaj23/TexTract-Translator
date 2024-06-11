@@ -1,0 +1,54 @@
+import cv2
+import pytesseract
+from googletrans import Translator
+
+# Initialize the camera
+camera = cv2.VideoCapture(0)
+# Set camera resolution (optional)
+camera.set(3, 640)
+camera.set(4, 480)
+
+# Initialize Tesseract OCR
+pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
+
+# Initialize Google Translator
+translator = Translator()
+
+def extract_text(image):
+    # Preprocess the image (optional)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # Apply any image processing techniques here if needed
+    # For example, thresholding, denoising, etc.
+
+    # Use Tesseract to extract text
+    extracted_text = pytesseract.image_to_string(gray)
+    return extracted_text
+
+def translate_text(text, target_language='en'):
+    translated_text = translator.translate(text, dest=target_language)
+    return translated_text.text
+
+while True:
+    # Capture image from camera
+    _, frame = camera.read()
+
+    # Extract text from image
+    extracted_text = extract_text(frame)
+
+    # Translate extracted text
+    translated_text = translate_text(extracted_text)
+
+    # Display original and translated text
+    print("Original Text:", extracted_text)
+    print("Translated Text:", translated_text)
+
+    # Display image with OpenCV (optional)
+    cv2.imshow('Image', frame)
+
+    # Exit loop when 'q' key is pressed
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# Release the camera and close OpenCV windows
+camera.release()
+cv2.destroyAllWindows()
